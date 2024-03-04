@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[greek, british, english]{babel}
+\usepackage{babel}
 \usepackage{natbib}
 %\graphicspath{{Figures/}}
 \usepackage{amsmath}
