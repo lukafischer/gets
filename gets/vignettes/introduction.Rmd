@@ -1,6 +1,6 @@
 ---
 date: "`r Sys.Date()`"
-title: "An Introduction to the gets package"
+title: "An Introduction to the gets package"^[This vignette is a minor modification of \\citet{PretisReadeSucarrat2018}]
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -8,6 +8,17 @@ output:
 vignette: >
   %\VignetteIndexEntry{An Introduction to the gets package}
   %\VignetteDepends{gets}
+  %\VignetteKeywords{general-to-specific, model selection, variable selection, regression of the mean, regression of the log-variance, time series, AR-X, log-ARCH-X, indicator saturation}
+  %\VignettePackage{gets}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage{babel}
+  \usepackage{natbib}
+  \usepackage{amsmath}
+  \usepackage{amssymb} %enable \mathbb, \subsetneq commands
+  \usepackage{graphicx} %needed for [scale..] argument in figures
+  \usepackage{hyperref} %see http://en.wikibooks.org/wiki/LaTeX/Hyperlinks and http://www.tug.org/applications/hyperref/manual.html#x1-120003.8
+
+
 ---
 
 <!-- \SweaveOpts{engine=R,eps=FALSE -->
