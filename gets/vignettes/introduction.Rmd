@@ -1,12 +1,15 @@
 ---
 date: "`r Sys.Date()`"
-title: "An Introduction to the gets package"^[This vignette is a minor modification of \\citet{PretisReadeSucarrat2018}]
+title: "An Introduction to the gets package^[This vignette is a minor modification of \\citet{PretisReadeSucarrat2018}]"
 output: 
-  rmarkdown::html_vignette:
+  bookdown::html_vignette2:
     toc: true
+    toc_depth: 3
     number_sections: true
+bibliography: bib-introduction.bib
+link-citations: yes
 vignette: >
-  %\VignetteIndexEntry{An Introduction to the gets package}
+  %\VignetteIndexEntry{An Introduction to the gets package^[This vignette is a minor modification of \citet{PretisReadeSucarrat2018}]}
   %\VignetteDepends{gets}
   %\VignetteKeywords{general-to-specific, model selection, variable selection, regression of the mean, regression of the log-variance, time series, AR-X, log-ARCH-X, indicator saturation}
   %\VignettePackage{gets}
@@ -17,8 +20,6 @@ vignette: >
   \usepackage{amssymb} %enable \mathbb, \subsetneq commands
   \usepackage{graphicx} %needed for [scale..] argument in figures
   \usepackage{hyperref} %see http://en.wikibooks.org/wiki/LaTeX/Hyperlinks and http://www.tug.org/applications/hyperref/manual.html#x1-120003.8
-
-
 ---
 
 <!-- \SweaveOpts{engine=R,eps=FALSE -->
@@ -41,7 +42,7 @@ Felix Pretis[^1], J. James Reade[^2] and Genaro Sucarrat[^3]
 
 \bigskip
 
-This version: ?today? [Original version: 3 September 2018]
+This version: `r Sys.Date()` [Original version: 3 September 2018]
 
 <!-- table of contents -->
 
@@ -57,9 +58,9 @@ This vignette provides an overview of the R package **gets**, which contains fac
 
 \bigskip
 
-General-to-specific (GETS) modeling combines well-known ingredients: backwards elimination, single and multiple hypothesis testing, goodness-of-fit measures and diagnostics tests. The way these are combined by GETS modeling enables rival theories and models to be tested against each other, ultimately resulting in a parsimonious, statistically valid model that explains the characteristics of the data being investigated. The methodology thus provides a systematic and coherent approach to model development and maintenance, cumulative research and scientific progress. This paper provides an overview of the R \citep{RCoreTeam2016} package **gets** \citep{gets}, which contains facilities for automated general-to-specific (GETS) modeling of the mean and variance of cross-sectional and time-series regressions, and indicator saturation (IS) methods for the detection and modeling of outliers and structural breaks in the mean.
+General-to-specific (GETS) modeling combines well-known ingredients: backwards elimination, single and multiple hypothesis testing, goodness-of-fit measures and diagnostics tests. The way these are combined by GETS modeling enables rival theories and models to be tested against each other, ultimately resulting in a parsimonious, statistically valid model that explains the characteristics of the data being investigated. The methodology thus provides a systematic and coherent approach to model development and maintenance, cumulative research and scientific progress. This paper provides an overview of the R package **gets**, which contains facilities for automated general-to-specific (GETS) modeling of the mean and variance of cross-sectional and time-series regressions, and indicator saturation (IS) methods for the detection and modeling of outliers and structural breaks in the mean.
 
-The origins of GETS modeling can be traced back to Denis Sargan and the London School of Economics (LSE) during the 1960s, see [@Hendry03] and [@Mizon95]. However, it was not until the 1980s and 1990s that the methodology gained widespread acceptance and usage in economics, with David F. Hendry in particular being a main proponent, see the two-volume article collection by [@CamposEricssonHendry2005] for a comprehensive overview of the GETS methodology. An important software-contribution to GETS modeling was made in 1999, when [@Hooveretal99] re-visited the data-mining experiment of [@Lovell83]. [@Hooveretal99] showed that automated multi-path GETS modeling substantially improved upon the then (in economics) popular model selection strategies. In the study of [@Hooveretal99], purpose-specific but limited MATLAB \citep{MATLABR2017b} code was used in the simulations.[^4]
+The origins of GETS modeling can be traced back to Denis Sargan and the London School of Economics (LSE) during the 1960s, see [@hendry2003sargan] and [@Mizon95]. However, it was not until the 1980s and 1990s that the methodology gained widespread acceptance and usage in economics, with David F. Hendry in particular being a main proponent, see the two-volume article collection by [@CamposEricssonHendry2005] for a comprehensive overview of the GETS methodology. An important software-contribution to GETS modeling was made in 1999, when [@Hooveretal99] re-visited the data-mining experiment of [@Lovell83]. [@Hooveretal99] showed that automated multi-path GETS modeling substantially improved upon the then (in economics) popular model selection strategies. In the study of [@Hooveretal99], purpose-specific but limited MATLAB \citep{MATLABR2017b} code was used in the simulations.[^4]
 
 [^4]: The code is limited in that it allows for a maximum of 10 paths to be searched, and because there is no user manual nor help-system available. The data and \proglang{MATLAB} code is available from <http://www.feweb.vu.nl/econometriclinks/journal/volume2/HooverKD_PerezSJ/data_and_code/>.
 
@@ -71,18 +72,17 @@ This paper provides an overview of the **gets** package. The main model class un
 
 ## GETS modeling {#subsec:gets:modeling}
 
-It is convenient to provide an overview of GETS modeling in terms of the linear regression model \begin{equation}
+It is convenient to provide an overview of GETS modeling in terms of the linear regression model 
 
-y_{t} = \beta_1 x_{1t} + \cdots + \beta_k x_{kt} + u_{t}, \qquad t=1,2,..., n
+\begin{equation}
 
-\tag{1}
+y_{t} = \beta_1 x_{1t} + \cdots + \beta_k x_{kt} + u_{t}, \qquad t=1,2,..., n 
 
+(\#eq:linear-regression-model)
 
 \end{equation}
 
-(#eq:linear:regression:model)
-
-where $y_t$ is the dependent variable, the $\beta$'s are slope coefficients, the $x$'s are the regressors and $u_t$ is a zero mean error term. GETS modeling assumes there exists at least one "local" data generating process (LDGP) nested in (\@ref(eq:linear:regression:model)). By philosophical assumption $the$ DGP is not contained in the simple model above, see [@Sucarrat2010] and \citet[][Sections 6.2--6.3]{HendryDoornik2014}. The qualifier\`local'' thus means it is assumed that there exists a specification within (\@ref(eq:linear:regression:model)) that is a statistically valid representation of $the$ DGP. Henceforth, for notational and theoretical convenience, we will assume there exists only a single LDGP, but this is not a necessary condition.
+where $y_t$ is the dependent variable, the $\beta$'s are slope coefficients, the $x$'s are the regressors and $u_t$ is a zero mean error term. GETS modeling assumes there exists at least one "local" data generating process (LDGP) nested in (\@ref(eq:linear-regression-model)). By philosophical assumption $the$ DGP is not contained in the simple model above, see [@Sucarrat2010] and \citet[][Sections 6.2--6.3]{HendryDoornik2014}. The qualifier\`local'' thus means it is assumed that there exists a specification within (\@ref(eq:linear:regression:model)) that is a statistically valid representation of $the$ DGP. Henceforth, for notational and theoretical convenience, we will assume there exists only a single LDGP, but this is not a necessary condition.
 
 A variable $x_{jt}$, $j\in \{1,...,k\}$, is said to be relevant if $\beta_j \neq 0$ and irrelevant if $\beta_j = 0$. Let $k_{\text{rel}} \geq 0$ and $k_{\text{irr}} \geq 0$ denote the number of relevant and irrelevant variables, respectively, such that $k_{\text{rel}} + k_{\text{irr}} = k$. Of course, both $k_{\text{rel}}$ and $k_{\text{irr}}$ are unknown to the investigator. GETS modeling aims at finding a specification that contains as many relevant variables as possible, and a proportion of irrelevant variables that corresponds to the significance level $\alpha$ chosen by the investigator. Put differently, if $\widehat{k}_{\text{rel}}$ and $\widehat{k}_{\text{irr}}$ are the retained number of relevant and irrelevant variables, respectively, then GETS modeling aims at satisfying
 
@@ -196,6 +196,8 @@ As is clear from the table, GETS may be viewed as being more general than many o
 \citet[Section 17]{HendryDoornik2014} together with [@castle2011evaluating] provide a broad overview of the performance of GETS relative to alternative model selection strategies of the mean of a regression, including step-wise regression, information criteria and penalized shrinkage-based selection using the Lasso \citep[see][]{tibshirani1996regression}. [@castle2015detecting] compare GETS in the context of step-shifts against the Lasso using LARS \citep{efron2004least}, and [@pretis_volc16] compare GETS against the Lasso for designed break functions (see Section [7.3](sec:isat_comp)) for a more detailed discussion of **gets** in the context of break detection). In both instances shrinkage-based selection is implemented using the R packages **lars** \citep{HastieEfron2013} and **glmnet** \citep{friedman2010regularization}. The emerging consensus from these simulation comparisons is that the false-positive rate, or irrelevance proportion or gauge, is erratic and difficult to control in step-wise as well as shrinkage-based selection procedures. When selecting on information criteria only, the implicit significance level of selection results in a high gauge when the number of candidate variables increases relative to the sample size. In contrast, the gauge tends to be well-calibrated around the nominal size of selection $\alpha$ in GETS. While the retention of relevant variables often is high in shrinkage-based approaches (and erratic in step-wise regression), this result comes at the cost of a high gauge and the performance becomes less reliable in the presence of correlation between the candidate variables.
 
 To provide additional comparisons of performance to alternative methods for detecting relevant and discarding irrelevant variables, here we compare **gets** to: shrinkage-based selection, 1-cut selection (where all variables with $p$\~values $\leq \alpha$ in the GUM are retained in a single decision), and conducting selection inference starting at the DGP itself. The results are provided in Figure\~\@ref(fig_lass) (and Tables\~\@ref(tab_lassuncorr), \@ref(tab_lassposcorr), and \@ref(tab_lassnegcorr) in Appendix\~\@ref(sec:simulation-tables)). The simulations cover three correlation structures of regressors: First, in-expectation uncorrelated regressors, second, positively correlated regressors ($\rho=0.5$), and third, alternating negatively correlated regressors (where $\rho(x_i, x_{i+1}) = 0.5$, $\rho(x_i, x_{i+2})=-0.5$). We consider a total of $k=20$ regressors in a sample of $n=500$ observations for $1000$ replications. The number of relevant regressors is increased from $k_{\text{rel}}=0$ to $k_{\text{rel}}=10$ with coefficients set to correspond to an expected $t$-statistic of $\approx 3$. The performance of **gets** using the `getsm` function is compared to the cross-validated Lasso in **glmnet** and the Lasso with fixed penalty parameter such that the false-detection rate approximately matches `getsm` under the null (when $k_{\text{rel}}=0$). The significance level of 1-cut selection is chosen to match $\alpha=1\%$ in `getsm` selection.
+
+![test](fig_getsm_performance_v2.pdf){width=100%}
 
 
 ```{=tex}
@@ -1092,409 +1094,18 @@ The objects returned by `arx`, `getsm`, `getsv` and `isat` are lists. The entrie
 
 The R package **gets** provides a toolkit for general-to-specific modeling through automatic variable selection in regression specifications of the mean and the variance, as well as indicator saturation methods to detect outliers and structural breaks. Starting with a general candidate set of variables unknown to be relevant or irrelevant, selection using `getsm` or `getsv` can yield parsimonious terminal models that satisfy a set of chosen diagnostic criteria, where parameter changes and outlying observations are detected using `isat`.
 
-<!-- # Reference -->
 
-```{=tex}
-\begin{thebibliography}{56}
-    \newcommand{\enquote}[1]{``#1''}
-    \providecommand{\natexlab}[1]{#1}
-    
-    \bibitem[{Akaike(1974)}]{Akaike1974}
-    Akaike H (1974).
-    \newblock ``A New Look at the Statistical Model Identification.''
-    \newblock *IEEE Transactions on Automatic Control*, **19**(6),
-    716--723.
-    \newblock <https://doi.org/10.1109/tac.1974.1100705>.
-    
-    \bibitem[{Bai and Perron(1998)}]{bai1998estimating}
-    Bai J, Perron P (1998).
-    \newblock ``Estimating and Testing Linear Models with Multiple
-        Structural Changes.''
-    \newblock *Econometrica*, **66**(1), 47--78.
-    \newblock <https://doi.org/10.2307/2998540>.
-    
-    \bibitem[{Bai and Perron(2003)}]{bai2003computation}
-    Bai J, Perron P (2003).
-    \newblock ``Computation and Analysis of Multiple Structural Change
-        Models.''
-    \newblock *Journal of Applied Econometrics*, **18**(1), 1--22.
-    \newblock <https://doi.org/10.1002/jae.659>.
-    
-    \bibitem[{Campos *et~al.*(2005)Campos, Hendry, and
-        Ericsson}]{CamposEricssonHendry2005}
-    Campos J, Hendry DF, Ericsson NR (eds.) (2005).
-    \newblock *General-to-Specific Modeling. Volumes 1 and 2*.
-    \newblock Edward Elgar Publishing, Cheltenham.
-    
-    \bibitem[{Castle *et~al.*(2011)Castle, Doornik, and
-        Hendry}]{castle2011evaluating}
-    Castle JL, Doornik JA, Hendry DF (2011).
-    \newblock ``Evaluating Automatic Model Selection.''
-    \newblock *Journal of Time Series Econometrics*, **3**(1), 1--31.
-    \newblock <https://doi.org/10.2202/1941-1928.1097>.
-    
-    \bibitem[{Castle *et~al.*(2015)Castle, Doornik, Hendry, and
-        Pretis}]{castle2015detecting}
-    Castle JL, Doornik JA, Hendry DF, Pretis F (2015).
-    \newblock ``Detecting Location Shifts During Model Selection by
-        Step-Indicator Saturation.''
-    \newblock *Econometrics*, **3**(2), 240--264.
-    \newblock <https://doi.org/10.3390/econometrics3020240>.
-    
-    \bibitem[{Dahl(2016)}]{Dahl2016}
-    Dahl DB (2016).
-    \newblock *\pkg{xtable*: Export Tables to \LaTeX{} or HTML}.
-    \newblock \proglang{R} package version 1.8-2,
-    <https://CRAN.R-project.org/package=xtable>.
-    
-    \bibitem[{Doornik(2006)}]{Doornik2006}
-    Doornik J (2006).
-    \newblock *\proglang{Ox*: An Object Oriented Matrix Programming Language}.
-    \newblock 5th edition. Timberlake Consultants Ltd., London.
-    
-    \bibitem[{Doornik(2009)}]{Doornik2009}
-    Doornik J (2009).
-    \newblock ``\pkg{Autometrics}.''
-    \newblock In JL~Castle, N~Shephard (eds.), \emph{The Methodology and Practice
-        of Econometrics: A Festschrift in Honour of David F. {H}endry}, pp. 88--121.
-    Oxford University Press, Oxford.
-    
-    \bibitem[{Doornik and Hendry(2007{a})}]{DoornikHendry2007}
-    Doornik JA, Hendry DF (2007{a}).
-    \newblock *Empirical Econometric Modelling -- \pkg{PcGive* 12: Volume I}.
-    \newblock Timberlake Consultants Ltd., London.
-    
-    \bibitem[{Doornik and Hendry(2007{b})}]{DoornikHendry2007a}
-    Doornik JA, Hendry DF (2007{b}).
-    \newblock *Empirical Econometric Modelling -- \pkg{PcGive* 12: Volume II}.
-    \newblock Timberlake Consultants Ltd., London.
-    
-    \bibitem[{Duan(1983)}]{Duan1983}
-    Duan N (1983).
-    \newblock ``Smearing Estimate: A Nonparametric Retransformation Method.''
-    \newblock *Journal of the Americal Statistical Association*,
-    **78**(383), 605--610.
-    \newblock <https://doi.org/10.2307/2288126>.
-    
-    \bibitem[{Efron *et~al.*(2004)Efron, Hastie, Johnstone, and
-        Tibshirani}]{efron2004least}
-    Efron B, Hastie T, Johnstone I, Tibshirani R (2004).
-    \newblock ``Least Angle Regression.''
-    \newblock *The Annals of Statistics*, **32**(2), 407--499.
-    \newblock <https://doi.org/10.1214/009053604000000067>.
-    
-    \bibitem[{Engle(1982)}]{Engle82}
-    Engle R (1982).
-    \newblock ``Autoregressive Conditional Heteroscedasticity with Estimates
-        of the Variance of United Kingdom Inflations.''
-    \newblock *Econometrica*, **50**(4), 987--1008.
-    \newblock <https://doi.org/10.2307/1912773>.
-    
-    \bibitem[{Ericsson(2017)}]{ericsson2013biased}
-    Ericsson NR (2017).
-    \newblock ``How Biased Are US Government Forecasts of the Federal Debt?''
-    \newblock *International Journal of Forecasting*, **33**(2),
-    543--559.
-    \newblock <https://doi.org/10.1016/j.ijforecast.2016.09.001>.
-    
-    \bibitem[{Francq and Sucarrat(2018)}]{FrancqSucarrat2013}
-    Francq C, Sucarrat G (2018).
-    \newblock ``An Exponential Chi-Squared QMLE for Log-GARCH Models Via the
-        ARMA Representation.''
-    \newblock *Journal of Financial Econometrics*, **16**(1), 129--154.
-    \newblock <https://doi.org/10.1093/jjfinec/nbx032>.
-    
-    \bibitem[{Friedman *et~al.*(2010)Friedman, Hastie, and
-        Tibshirani}]{friedman2010regularization}
-    Friedman J, Hastie T, Tibshirani R (2010).
-    \newblock ``Regularization Paths for Generalized Linear Models via
-        Coordinate Descent.''
-    \newblock *Journal of Statistical Software*, **33**(1), 1--22.
-    \newblock <https://doi.org/10.18637/jss.v033.i01>.
-    
-    \bibitem[{Glosten *et~al.*(1993)Glosten, Jagannathan, and
-        Runkle}]{GlostenJagannathanRunkle1993}
-    Glosten LR, Jagannathan R, Runkle DE (1993).
-    \newblock ``On the Relation between the Expected Value and the
-        Volatility of the Nominal Excess Return on Stocks.''
-    \newblock *Journal of Finance*, **48**(5), 1779--1801.
-    \newblock <https://doi.org/10.2307/2329067>.
-    
-    \bibitem[{Hannan and Quinn(1979)}]{HannanQuinn1979}
-    Hannan EJ, Quinn BG (1979).
-    \newblock ``The Determination of the Order of an Autoregression.''
-    \newblock *Journal of the Royal Statistical Society B*, **41**(2),
-    190--195.
-    
-    \bibitem[{Hastie and Efron(2013)}]{HastieEfron2013}
-    Hastie T, Efron B (2013).
-    \newblock *\pkg{lars*: Least Angle Regression, Lasso and Forward
-        Stagewise}.
-    \newblock \proglang{R} package version 1.2,
-    <https://CRAN.R-project.org/package=lars>.
-    
-    \bibitem[{Hendry(2003)}]{Hendry03}
-    Hendry DF (2003).
-    \newblock ``J. Denis Sargan and the Origins of LSE Econometric
-        Methodology.''
-    \newblock *Econometric Theory*, **19**(3), 457--480.
-    \newblock <https://doi.org/10.1017/s0266466603193061>.
-    
-    \bibitem[{Hendry and Doornik(2014)}]{HendryDoornik2014}
-    Hendry DF, Doornik J (2014).
-    \newblock *Empirical Model Discovery and Theory Evaluation*.
-    \newblock The MIT Press, London.
-    
-    \bibitem[{Hendry and Johansen(2015)}]{hendry2015model}
-    Hendry DF, Johansen S (2015).
-    \newblock ``Model Discovery and Trygve Haavelmo's Legacy.''
-    \newblock *Econometric Theory*, **31**(1), 93--114.
-    \newblock <https://doi.org/10.1017/s0266466614000218>.
-    
-    \bibitem[{Hendry *et~al.*(2007)Hendry, Johansen, and
-        Santos}]{HendryJohansenSantos2007}
-    Hendry DF, Johansen S, Santos C (2007).
-    \newblock ``Automatic Selection of Indicators in a Fully Saturated
-        Regression.''
-    \newblock *Computational Statistics*, **23**(2), 317--335.
-    \newblock <https://doi.org/10.1007/s00180-007-0054-z>.
-    
-    \bibitem[{Hendry and Krolzig(2001)}]{Hendryetal01}
-    Hendry DF, Krolzig HM (2001).
-    \newblock *Automatic Econometric Model Selection Using \pkg{PcGets*}.
-    \newblock Timberlake Consultants Press, London.
-    
-    \bibitem[{Hendry and Krolzig(2005)}]{HendryKrolzig2005}
-    Hendry DF, Krolzig HM (2005).
-    \newblock ``The Properties of Automatic Gets Modelling.''
-    \newblock *The Economic Journal*, **115**(502), C32--C61.
-    \newblock <https://doi.org/10.1111/j.0013-0133.2005.00979.x>.
-    
-    \bibitem[{Hoover and Perez(1999)}]{Hooveretal99}
-    Hoover KD, Perez SJ (1999).
-    \newblock ``Data Mining Reconsidered: Encompassing and the
-        General-to-Specific Approach to Specification Search.''
-    \newblock *The Econometrics Journal*, **2**(2), 167--191.
-    \newblock <https://doi.org/10.1111/1368-423x.00025>.
-    
-    \bibitem[{{IHS Markit}(2017)}]{EViews2016v9.5}
-    {IHS Markit} (2017).
-    \newblock *\proglang{EViews* Version 9.5}.
-    \newblock IHS Markit, Irvine, CA.
-    \newblock <http://www.eviews.com/>.
-    
-    \bibitem[{Jarque and Bera(1980)}]{JarqueBera1980}
-    Jarque C, Bera A (1980).
-    \newblock ``Efficient Tests for Normality, Homoskedasticity, and Serial
-        Independence.''
-    \newblock *Economics Letters*, **6**(3), 255--259.
-    \newblock <https://doi.org/10.1016/0165-1765(80)90024-5>.
-    
-    \bibitem[{Johansen and Nielsen(2016)}]{johansen2016asymptotic}
-    Johansen S, Nielsen B (2016).
-    \newblock ``Asymptotic Theory of Outlier Detection Algorithms for Linear
-        Time Series Regression Models.''
-    \newblock *Scandinavian Journal of Statistics*, **43**(2), 321--348.
-    \newblock <https://doi.org/10.1111/sjos.12174>.
-    
-    \bibitem[{Killick and Eckley(2014)}]{killick2014changepoint}
-    Killick R, Eckley I (2014).
-    \newblock ``\pkg{changepoint}: An \proglang{R} Package for Changepoint
-        Analysis.''
-    \newblock *Journal of Statistical Software*, **58**(3), 1--19.
-    \newblock <https://doi.org/10.18637/jss.v058.i03>.
-    
-    \bibitem[{Kleiber *et~al.*(2002)Kleiber, Hornik, Leisch, and
-        Zeileis}]{kleiber2002strucchange}
-    Kleiber C, Hornik K, Leisch F, Zeileis A (2002).
-    \newblock ``\pkg{strucchange}: An \proglang{R} Package for Testing for
-        Structural Change in Linear Regression Models.''
-    \newblock *Journal of Statistical Software*, **7**(2), 1--38.
-    \newblock <https://doi.org/10.18637/jss.v007.i02>.
-    
-    \bibitem[{Ljung and Box(1978)}]{Ljungetal79}
-    Ljung GM, Box GEP (1978).
-    \newblock ``On a Measure of Lack of Fit in Time Series Models.''
-    \newblock *Biometrika*, **65**(2), 297--303.
-    \newblock <https://doi.org/10.2307/2335207>.
-    
-    \bibitem[{Lovell(1983)}]{Lovell83}
-    Lovell MC (1983).
-    \newblock ``Data Mining.''
-    \newblock *The Review of Economics and Statistics*, **65**(1), 1--12.
-    \newblock <https://doi.org/10.2307/1924403>.
-    
-    \bibitem[{Mizon(1995)}]{Mizon95}
-    Mizon G (1995).
-    \newblock ``Progressive Modeling of Macroeconomic Time Series: The LSE
-        Methodology.''
-    \newblock In KD~Hoover (ed.), \emph{Macroeconometrics. Developments, Tensions
-        and Prospects}, pp. 107--169. Kluwer Academic Publishers, Dordrecht.
-    
-    \bibitem[{Newey and West(1987)}]{Neweyetal87}
-    Newey W, West K (1987).
-    \newblock ``A Simple Positive Semi-Definite, Heteroskedasticity and
-        Autocorrelation Consistent Covariance Matrix.''
-    \newblock *Econometrica*, **55**(3), 703--708.
-    \newblock <https://doi.org/10.2307/1913610>.
-    
-    \bibitem[{Perron(2006)}]{perron2006dealing}
-    Perron P (2006).
-    \newblock ``Dealing with Structural Breaks.''
-    \newblock In H~Hassani, TC~Mills, K~Patterson (eds.), \emph{Palgrave Handbook
-        of Econometrics: Volume 1}, pp. 278--352. Palgrave MacMillan, Hampshire, UK.
-    
-    \bibitem[{Pretis(2017)}]{pretis2015istest}
-    Pretis F (2017).
-    \newblock ``Classifying Time-Varying Predictive Accuracy in Using
-        Bias-Corrected Indicator Saturation.''
-    \newblock University of Oxford Economics Discussion Paper.
-    
-    \bibitem[{Pretis and Jiao(2017)}]{pretis2017gauge}
-    Pretis F, Jiao X (2017).
-    \newblock ``Testing the Presence of Outliers to Assess Misspecification
-        in Regression Models.''
-    \newblock University of Oxford Economics Discussion Paper.
-    
-    \bibitem[{Pretis *et~al.*(2015)Pretis, Mann, and
-        Kaufmann}]{pretis2015testing}
-    Pretis F, Mann ML, Kaufmann RK (2015).
-    \newblock ``Testing Competing Models of the Temperature Hiatus:
-        Assessing the Effects of Conditioning Variables and Temporal Uncertainties
-        Through Sample-Wide Break Detection.''
-    \newblock *Climatic Change*, **131**(4), 705--718.
-    \newblock <https://doi.org/10.1007/s10584-015-1391-5>.
+# References {.unnumbered}
 
-    \bibitem[{Pretis *et~al.*(2018)Pretis, Reade, and
-    Sucarrat}]{PretisReadeSucarrat2018}
-    Pretis F, Reade JJ, Sucarrat G (2018).
-    \newblock ``Automated General-to-Specific (GETS) Regression Modeling
-        and Indicator Saturation for Outliers and Structural Breaks.''
-    \newblock *Journal of Statistical Software*, **86**(3), 1--44.
-    \newblock <https://doi.org/10.18637/jss.v086.i03>.
-    
-    \bibitem[{Pretis *et~al.*(2016)Pretis, Schneider, Smerdon, and
-        Hendry}]{pretis_volc16}
-    Pretis F, Schneider L, Smerdon JE, Hendry DF (2016).
-    \newblock ``Detecting Volcanic Eruptions in Temperature Reconstructions
-        by Designed Break-Indicator Saturation.''
-    \newblock *Journal of Economic Surveys*, **30**(3), 403--429.
-    \newblock <https://doi.org/10.1111/joes.12148>.
-    
-    \bibitem[{{\proglang{R} Core Team}(2018)}]{RCoreTeam2016}
-    {\proglang{R} Core Team} (2018).
-    \newblock *\proglang{R*: A Language and Environment for Statistical
-        Computing}.
-    \newblock \proglang{R} Foundation for Statistical Computing, Vienna, Austria.
-    \newblock <https://www.R-project.org/>.
-    
-    \bibitem[{Schneider *et~al.*(2017)Schneider, Smerdon, Pretis, Hartl-Meier,
-        and Esper}]{schneider2017}
-    Schneider L, Smerdon J, Pretis F, Hartl-Meier C, Esper J (2017).
-    \newblock ``A New Archive of Large Volcanic Events Over the Past
-        Millennium Derived from Reconstructed Summer Temperatures.''
-    \newblock *Environmental Research Letters*, **12**(9), 094005.
-    \newblock <https://doi.org/10.1088/1748-9326/aa7a1b>.
-    
-    \bibitem[{Schwarz(1978)}]{Schwarz1978}
-    Schwarz G (1978).
-    \newblock ``Estimating the Dimension of a Model.''
-    \newblock *The Annals of Statistics*, **6**(2), 461--464.
-    \newblock <https://doi.org/10.1214/aos/1176344136>.
-    
-    \bibitem[{Smith *et~al.*(2011)Smith, {van Aardenne}, Klimont, Andres,
-        Volke, and {Delgado Arias}}]{smith2011anthropogenic}
-    Smith SJ, {van Aardenne} J, Klimont Z, Andres RJ, Volke A, {Delgado Arias} S
-    (2011).
-    \newblock ``Anthropogenic Sulfur Dioxide Emissions: 1850--2005.''
-    \newblock *Atmospheric Chemistry and Physics*, **11**(3), 1101--1116.
-    \newblock <https://doi.org/10.5194/acp-11-1101-2011>.
-    
-    \bibitem[{{StataCorp}(2017)}]{STATA2017}
-    {StataCorp} (2017).
-    \newblock *\proglang{STATA* Statistical Software: Release~15}.
-    \newblock StataCorp LLC, College Station, TX.
-    \newblock <http://www.stata.com/>.
-    
-    \bibitem[{Sucarrat(2010)}]{Sucarrat2010}
-    Sucarrat G (2010).
-    \newblock ``Econometric Reduction Theory and Philosophy.''
-    \newblock *Journal of Economic Methodology*, **17**(1), 53--75.
-    \newblock <https://doi.org/10.1080/13501780903528978>.
-    
-    \bibitem[{Sucarrat(2015{a})}]{AutoSEARCH}
-    Sucarrat G (2015{a}).
-    \newblock *\pkg{AutoSEARCH*: General-to-Specific (GETS) Modelling}.
-    \newblock \proglang{R} package version 1.5,
-    <https://CRAN.R-project.org/package=AutoSEARCH>.
-    
-    \bibitem[{Sucarrat(2015{b})}]{Sucarrat2015lgarchV06}
-    Sucarrat G (2015{b}).
-    \newblock *\pkg{lgarch*: Simulation and Estimation of Log-GARCH Models}.
-    \newblock \proglang{R} package version 0.6-2,
-    <https://CRAN.R-project.org/package=lgarch/>.
-    
-    \bibitem[{Sucarrat and Escribano(2012)}]{SucarratEscribano2012}
-    Sucarrat G, Escribano {\'A} (2012).
-    \newblock ``Automated Model Selection in Finance: General-to-Specific
-        Modelling of the Mean and Volatility Specifications.''
-    \newblock *Oxford Bulletin of Economics and Statistics*, **74**(5),
-    716--735.
-    \newblock <https://doi.org/10.1111/j.1468-0084.2011.00669.x>.
-    
-    \bibitem[{Sucarrat *et~al.*(2016)Sucarrat, Gr{\o}nneberg, and
-        Escribano}]{SucarratGronnebergEscribano2016}
-    Sucarrat G, Gr{\o}nneberg S, Escribano {\'A} (2016).
-    \newblock ``Estimation and Inference in Univariate and Multivariate
-        Log-GARCH-X Models When the Conditional Density Is Unknown.''
-    \newblock *Computational Statistics \& Data Analysis*, **100**,
-    582--594.
-    \newblock <https://doi.org/10.1016/j.csda.2015.12.005>.
-    
-    \bibitem[{Sucarrat *et~al.*(2018)Sucarrat, Pretis, and Reade}]{gets}
-    Sucarrat G, Pretis F, Reade J (2018).
-    \newblock *\pkg{gets*: General-to-Specific (GETS) Modelling and Indicator
-        Saturation Methods}.
-    \newblock \proglang{R} package version 0.15,
-    <https://CRAN.R-project.org/package=gets>.
-    
-    \bibitem[{{The~MathWorks Inc.}(2017)}]{MATLABR2017b}
-    {The~MathWorks Inc} (2017).
-    \newblock *\proglang{MATLAB* -- The Language of Technical Computing,
-        Version R2017b.}
-    \newblock Natick, Massachusetts.
-    \newblock <http://www.mathworks.com/products/matlab/>.
-    
-    \bibitem[{Tibshirani(1996)}]{tibshirani1996regression}
-    Tibshirani R (1996).
-    \newblock ``Regression Shrinkage and Selection via the Lasso.''
-    \newblock *Journal of the Royal Statistical Society B*, **58**(1),
-    267--288.
-    
-    \bibitem[{White(1980)}]{White80}
-    White H (1980).
-    \newblock ``A Heteroskedasticity-Consistent Covariance Matrix and a
-        Direct Test for Heteroskedasticity.''
-    \newblock *Econometrica*, **48**(4), 817--838.
-    \newblock <https://doi.org/10.2307/1912934>.
-    
-    \bibitem[{Zeileis and Grothendieck(2005)}]{ZeileisGrothendieck2005}
-    Zeileis A, Grothendieck G (2005).
-    \newblock ``**zoo**: \proglang{S}3 Infrastructure for Regular and
-        Irregular Time Series.''
-    \newblock *Journal of Statistical Software*, **14**(6), 1--27.
-    \newblock <https://doi.org/10.18637/jss.v014.i06>.
-    
-\end{thebibliography}
-```
-```{=tex}
-\newpage
-\appendix
-\section[Hoover and Perez (1999) simulations]{[@Hooveretal99] simulations}
-```
-{#appendix}
+<div id="refs"></div>
 
-Table\~\@ref(table:list 1 of experiments) contains the list of experiments. The design of the experiments HP1, HP2' and HP7' are based on \citet[][see Table 3 on p.~174]{Hooveretal99}, and make use of their data $x_{1t}^{\text{HP}},...,x_{36t}^{\text{HP}}$. It should be noted that there are two typos in their Table 3. The value $\sqrt{(7/4)}$ should instead be $\sqrt{7}/4$ in the model of the autoregressive error, and the value 6.73 should instead be 6.44 in model 7', see also \citet{Doornik2009}. The number of relevant variables in the GUM is $k_{\text{rel}}$, the number of irrelevant variables in the GUM is $k_{\text{irr}}$ and the total number of variables (the constant included) in the GUM is $k = k_{\text{rel}} + k_{\text{irr}} + 1$. Nominal regressor significance level used is 5%, and 1000 replications. The term $m(\hat{k}_{\text{rel}}/k_{\text{rel}})$ is the average proportion of relevant variables $\hat{k}_{\text{rel}}$ retained relative to the actual number of relevant variables $k_{\text{rel}}$ in the DGP. The term $m(\hat{k}_{\text{irr}}/k_{\text{irr}})$ denotes the average proportion of irrelevant variables $\hat{k}_{\text{irr}}$ retained relative to the actual number of irrelevant variables $k_{\text{irr}}$ in the GUM. The estimate $\hat{k}_{\text{irr}}$ includes both significant and insignificant retained irrelevant variables (this is in line with \citet{HendryKrolzig2005}, and \citet{Doornik2009}, but counter to HP which only includes significant irrelevant variables in the estimate). $\hat{p}(\text{DGP})$ is the proportion of times the DGP is found exactly. The properties of the HP algorithm are from \citet[][Table 4 on p.~179]{Hooveretal99}. The properties of the **PcGets** algorithm are from \citet[][Figure 1 on
+# (APPENDIX) Appendix {-} 
+
+
+# Hoover and Perez [@Hooveretal99] simulations
+
+
+Table \@ref(table:list 1 of experiments) contains the list of experiments. The design of the experiments HP1, HP2' and HP7' are based on \citet[][see Table 3 on p.~174]{Hooveretal99}, and make use of their data $x_{1t}^{\text{HP}},...,x_{36t}^{\text{HP}}$. It should be noted that there are two typos in their Table 3. The value $\sqrt{(7/4)}$ should instead be $\sqrt{7}/4$ in the model of the autoregressive error, and the value 6.73 should instead be 6.44 in model 7', see also \citet{Doornik2009}. The number of relevant variables in the GUM is $k_{\text{rel}}$, the number of irrelevant variables in the GUM is $k_{\text{irr}}$ and the total number of variables (the constant included) in the GUM is $k = k_{\text{rel}} + k_{\text{irr}} + 1$. Nominal regressor significance level used is 5%, and 1000 replications. The term $m(\hat{k}_{\text{rel}}/k_{\text{rel}})$ is the average proportion of relevant variables $\hat{k}_{\text{rel}}$ retained relative to the actual number of relevant variables $k_{\text{rel}}$ in the DGP. The term $m(\hat{k}_{\text{irr}}/k_{\text{irr}})$ denotes the average proportion of irrelevant variables $\hat{k}_{\text{irr}}$ retained relative to the actual number of irrelevant variables $k_{\text{irr}}$ in the GUM. The estimate $\hat{k}_{\text{irr}}$ includes both significant and insignificant retained irrelevant variables (this is in line with \citet{HendryKrolzig2005}, and \citet{Doornik2009}, but counter to HP which only includes significant irrelevant variables in the estimate). $\hat{p}(\text{DGP})$ is the proportion of times the DGP is found exactly. The properties of the HP algorithm are from \citet[][Table 4 on p.~179]{Hooveretal99}. The properties of the **PcGets** algorithm are from \citet[][Figure 1 on
 p.~C39]{HendryKrolzig2005}, and the properties of the Autometrics algorithm are from \citet[][Section 6]{Doornik2009}. For **AutoSEARCH**, a constant is included in all the regressions but ignored in the evaluation of successes and failures (this is in line with \citet{Hooveretal99} but counter to \citet{HendryKrolzig2005}, and \citet{Doornik2009}), in the diagnostic checks both the AR and ARCH test of the standardized residuals were undertaken at lag 2 using a significance level of 2.5% for each, and as tiebreaker the Schwarz information criterion is used with a Gaussian log-likelihood made up of the standardized residuals of the mean specification.
 
 ```{=tex}
@@ -1520,7 +1131,7 @@ p.~C39]{HendryKrolzig2005}, and the properties of the Autometrics algorithm are 
 ```
 # Simulation tables {#sec:simulation-tables}
 
-Tables\~\@ref(tab_lassuncorr), \@ref(tab_lassposcorr), \@ref(tab_lassnegcorr) and \@ref(tab_isatgauge) present the simulation results comparing **gets** to alternative variable selection methods, and the properties of `isat` under the null of no breaks.
+Tables \@ref(tab_lassuncorr), \@ref(tab_lassposcorr), \@ref(tab_lassnegcorr) and \@ref(tab_isatgauge) present the simulation results comparing **gets** to alternative variable selection methods, and the properties of `isat` under the null of no breaks.
 
 ```{=tex}
 \begin{table}[t!]
